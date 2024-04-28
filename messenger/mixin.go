@@ -10,7 +10,7 @@ import (
 	"github.com/MixinNetwork/bot-api-go-client"
 	"github.com/MixinNetwork/tip/logger"
 	"github.com/fox-one/mixin-sdk-go"
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v5"
 )
 
 type MixinConfiguration struct {

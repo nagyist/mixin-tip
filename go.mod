@@ -1,6 +1,6 @@
 module github.com/MixinNetwork/tip
 
-go 1.22.2
+go 1.23.2
 
 require (
 	github.com/MixinNetwork/bot-api-go-client v1.8.7

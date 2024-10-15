@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MixinNetwork/bot-api-go-client"
+	"github.com/MixinNetwork/bot-api-go-client/v3"
 	"github.com/MixinNetwork/tip/logger"
 	"github.com/fox-one/mixin-sdk-go"
 	"github.com/gofrs/uuid/v5"
@@ -161,7 +161,7 @@ func (mm *MixinMessenger) OnMessage(ctx context.Context, msg bot.MessageView, us
 	if msg.ConversationId != mm.conversationId {
 		return nil
 	}
-	data, err := base64.StdEncoding.DecodeString(msg.Data)
+	data, err := base64.RawURLEncoding.DecodeString(msg.DataBase64)
 	if err != nil {
 		return nil
 	}

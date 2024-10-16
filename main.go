@@ -16,7 +16,7 @@ import (
 	"github.com/MixinNetwork/tip/signer"
 	"github.com/MixinNetwork/tip/store"
 	"github.com/drand/kyber/pairing/bn256"
-	"github.com/drand/kyber/sign/bls"
+	"github.com/drand/kyber/sign/bdn"
 	"github.com/drand/kyber/util/random"
 	"github.com/fox-one/mixin-sdk-go"
 	"github.com/urfave/cli/v2"
@@ -26,7 +26,7 @@ func main() {
 	app := &cli.App{
 		Name:                 "tip",
 		Usage:                "TIP (Throttled Identity PIN) is a decentralized key custodian.",
-		Version:              "0.2.5",
+		Version:              "0.3.0",
 		EnableBashCompletion: true,
 		Flags: []cli.Flag{
 			&cli.StringFlag{
@@ -204,7 +204,7 @@ func genKey(c *cli.Context) error {
 	point := suite.Point().Mul(scalar, nil)
 
 	msg := []byte("tip")
-	scheme := bls.NewSchemeOnG1(suite)
+	scheme := bdn.NewSchemeOnG1(suite)
 	sig, err := scheme.Sign(scalar, msg)
 	if err != nil {
 		return err

@@ -39,11 +39,14 @@ func TestTip(t *testing.T) {
 	nonce = 123
 	sig, evicted, err = client.Sign(key, ephemeral, nonce, grace, "", "", watcher)
 	assert.NotNil(err)
+	assert.Len(evicted, 4)
+	assert.Len(sig, 0)
 
 	nonce = 1234
 	sig, evicted, err = client.Sign(key, ephemeral, nonce, grace, "", "", watcher)
 	assert.Nil(err)
 	assert.Len(evicted, 0)
+	assert.Equal("8258bc1a22db4865529d7c01a949d303e4d834d6fe79fcf746c6ad3fcb2ee37583975a034eea3ad08105c856f5c302ed02e2b11b71440d9e31da5b06097b691f", hex.EncodeToString(sig))
 	log.Println(hex.EncodeToString(sig))
 }
 
@@ -55,19 +58,19 @@ func testConfigurationJSON() *Configuration {
 			"5Jm9wNExYE3BcjYoHagvzPwWgK9WtAVf9JEwyQugDfT88GmZZr6Ztb9tALV4cYamauNunuVzaCmmZHmhK9yztGWyAKtoe6VeTfEdUzLBhXq3ZQznxxJrEbADKN1GZFmx7xcRVe7iL2AxuwDRkXcgBiTNL4afNLmQ3tiW3t8VnpwxBoxzahoSaY",
 		},
 		Signers: []*signerPair{
-			&signerPair{
+			{
 				Identity: "5HrRVnj6PdfxKojB44te1XqhDSCexUxSognLi96SVx5B6VdnKkbyvUGcpkdQodg9rKgxM5v61ypmbJNGVWJTuacKUSZQfkq1mnc6P4XybemuXYmwSd5g2zkaArPc8VDTU5eEPuvgguSD8cnEgnMZzW7rJfaWoJU1DW6k2ujzUx15EjAG3WDTeG",
 				API:      "http://127.0.0.1:7022",
 			},
-			&signerPair{
+			{
 				Identity: "5HzufHDbh8kUj3oBiYWeEe4wamNMmQ4BZ5uZULxGsyKYULpWLUdzzBb73EExRDgUxZD5vu6iA61ds7QGSjeCWazSmpXv7sMaHfizSnHjxeoEy1TumWVqGJhtAAYwAJPzUbTdyzEGz5r9hRSYFAmHkhwCwLi8BoSk8V2scv6r7LdfphGbXSWSAV",
 				API:      "http://127.0.0.1:7023",
 			},
-			&signerPair{
+			{
 				Identity: "5JRrcBgsnUVr8D7tdTHX8nZAbkpPD4C5TS82KEbBMiV3inVp1vSu4gBwB1WwhQFguGbmkgrvA2vmtfY6GXhyFnh4SRoEQT2jVNTsk91pcPUaZ8nQcEdDAUjKXCTFi6TPDYPYPUsAK67kUXEtyNocsYUijKdF9pGRKUk92Rk7iRuJ3eqADYH7NB",
 				API:      "http://127.0.0.1:7021",
 			},
-			&signerPair{
+			{
 				Identity: "5Jt4ztqknKHcAw13RALYx2mXT9qkKKJTvrU7W7HNcF7vGKxzh5tvSqQvrY4aZCVqzk46DV8X69qudryZsjyKjzLJMjyRMYiDoQY7WZvNk874cibXAoZrUbp7Eyc8DgNLnPycisLbNofh3iJpKMK2qpsQH7AsFkAMdhH8KLFoBGruTs1XcevoC1",
 				API:      "http://127.0.0.1:7024",
 			},
@@ -75,7 +78,7 @@ func testConfigurationJSON() *Configuration {
 	}
 }
 
-func testRunServer(port int) error {
+func testRunServer(port int) {
 	ctx := context.Background()
 	store := testBadgerStore(port)
 	if store == nil {
@@ -94,7 +97,10 @@ func testRunServer(port int) error {
 	ac.Poly = node.GetPoly()
 	ac.Share = node.GetShare()
 	server := api.NewServer(store, ac)
-	return server.ListenAndServe()
+	err := server.ListenAndServe()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func testBadgerStore(port int) *store.BadgerStorage {

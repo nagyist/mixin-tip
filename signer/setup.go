@@ -13,7 +13,7 @@ import (
 	"github.com/drand/kyber/pairing/bn256"
 	"github.com/drand/kyber/share"
 	"github.com/drand/kyber/share/dkg"
-	"github.com/drand/kyber/sign/bls"
+	"github.com/drand/kyber/sign/bdn"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -38,7 +38,7 @@ func (node *Node) setup(ctx context.Context, nonce uint64) error {
 		Threshold: node.Threshold(),
 		Longterm:  node.key,
 		Nonce:     node.getNonce(nonce),
-		Auth:      bls.NewSchemeOnG1(suite),
+		Auth:      bdn.NewSchemeOnG1(suite),
 		FastSync:  true,
 		NewNodes:  node.signers,
 	}
@@ -50,14 +50,17 @@ func (node *Node) setup(ctx context.Context, nonce uint64) error {
 		return err
 	}
 	node.phaser <- dkg.DealPhase
-	go func() error {
+	go func() {
 		defer node.dkgDone()
 		pub, priv, err = node.runDKG(ctx, protocol)
 		logger.Verbose("runDKG", hex.EncodeToString(pub), hex.EncodeToString(priv), err)
 		if err != nil {
-			return err
+			panic(err)
 		}
-		return node.store.WritePoly(pub, priv)
+		err = node.store.WritePoly(pub, priv)
+		if err != nil {
+			panic(err)
+		}
 	}()
 	return nil
 }
@@ -66,7 +69,7 @@ func (node *Node) NextPhase() chan dkg.Phase {
 	return node.phaser
 }
 
-func (node *Node) runDKG(ctx context.Context, protocol *dkg.Protocol) ([]byte, []byte, error) {
+func (node *Node) runDKG(_ context.Context, protocol *dkg.Protocol) ([]byte, []byte, error) {
 	resCh := protocol.WaitEnd()
 	optRes := <-resCh
 	if optRes.Error != nil {

@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"bytes"
 	"context"
 	"crypto/rand"
 	"encoding/base64"
@@ -221,7 +220,7 @@ func TestGuard(t *testing.T) {
 	resNew, err := Guard(bs, signer, newIdentity, signature, data)
 	assert.Nil(err)
 	assert.NotNil(resNew)
-	assert.True(bytes.Compare(res.Assignor, resNew.Assignor) == 0)
+	assert.Equal(res.Assignor, resNew.Assignor)
 	_, _, counter, err = bs.Watch(watcherSeed)
 	assert.Nil(err)
 	assert.Equal(3, counter)

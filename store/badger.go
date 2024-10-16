@@ -95,7 +95,7 @@ func (bs *BadgerStorage) CheckEphemeralNonce(key, ephemeral []byte, nonce uint64
 			valid = true
 			return txn.Set(key, val)
 		}
-		if bytes.Compare(v[8:len(v)-8], ephemeral) != 0 {
+		if !bytes.Equal(v[8:len(v)-8], ephemeral) {
 			return nil
 		}
 		old = binary.BigEndian.Uint64(v[len(v)-8:])
@@ -138,7 +138,7 @@ func (bs *BadgerStorage) CheckPolyGroup(group []byte) (bool, error) {
 		if err != nil {
 			return err
 		}
-		if bytes.Compare(old, group) == 0 {
+		if bytes.Equal(old, group) {
 			valid = true
 		}
 		return nil
@@ -196,7 +196,7 @@ func (bs *BadgerStorage) WriteAssignee(key []byte, assignee []byte) error {
 			}
 		}
 
-		if bytes.Compare(key, assignee) != 0 {
+		if !bytes.Equal(key, assignee) {
 			old, err := readKey(txn, badgerKeyPrefixAssignee, assignee)
 			if err != nil {
 				return err
@@ -320,7 +320,7 @@ func (bs *BadgerStorage) WriteSignRequest(assignor, watcher []byte) (time.Time, 
 		old, err = readKey(txn, badgerKeyPrefixWatcher, watcher)
 		if err != nil {
 			return err
-		} else if old != nil && bytes.Compare(old, assignor) != 0 {
+		} else if old != nil && !bytes.Equal(old, assignor) {
 			return fmt.Errorf("invalid watcher %x", watcher)
 		}
 		key = append([]byte(badgerKeyPrefixWatcher), watcher...)

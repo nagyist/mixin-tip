@@ -106,7 +106,7 @@ func (hdr *Handler) error(w http.ResponseWriter, r *http.Request, code int) {
 func (hdr *Handler) json(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
 	id := r.Header.Get("X-Request-ID")
 	logger.Info(r.Method, r.URL, id, code, data)
-	hdr.render.JSON(w, code, data)
+	_ = hdr.render.JSON(w, code, data)
 }
 
 func handleCORS(handler http.Handler) http.Handler {
@@ -121,14 +121,14 @@ func handleCORS(handler http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Methods", "OPTIONS,GET,POST,DELETE")
 		w.Header().Set("Access-Control-Max-Age", "600")
 		if r.Method == "OPTIONS" {
-			render.New().JSON(w, http.StatusOK, map[string]interface{}{})
+			_ = render.New().JSON(w, http.StatusOK, map[string]interface{}{})
 		} else {
 			handler.ServeHTTP(w, r)
 		}
 	})
 }
 
-func handlePanic(w http.ResponseWriter, r *http.Request) {
+func handlePanic(_ http.ResponseWriter, _ *http.Request) {
 	rcv := recover()
 	if rcv == nil {
 		return

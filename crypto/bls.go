@@ -7,7 +7,7 @@ import (
 	"github.com/btcsuite/btcd/btcutil/base58"
 	"github.com/drand/kyber"
 	"github.com/drand/kyber/pairing/bn256"
-	"github.com/drand/kyber/sign/bls"
+	"github.com/drand/kyber/sign/bdn"
 )
 
 const (
@@ -15,12 +15,12 @@ const (
 )
 
 func Sign(scalar kyber.Scalar, msg []byte) ([]byte, error) {
-	scheme := bls.NewSchemeOnG1(bn256.NewSuiteG2())
+	scheme := bdn.NewSchemeOnG1(bn256.NewSuiteG2())
 	return scheme.Sign(scalar, msg)
 }
 
 func Verify(pub kyber.Point, msg, sig []byte) error {
-	scheme := bls.NewSchemeOnG1(bn256.NewSuiteG2())
+	scheme := bdn.NewSchemeOnG1(bn256.NewSuiteG2())
 	return scheme.Verify(pub, msg, sig)
 }
 

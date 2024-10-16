@@ -86,7 +86,10 @@ func (node *Node) handleSetupMessage(ctx context.Context, msg *Message) error {
 	}
 	node.setupActions[msg.Sender] = sb
 	if len(node.setupActions)+1 == len(node.signers) {
-		node.setup(ctx, sb.Nonce)
+		err := node.setup(ctx, sb.Nonce)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

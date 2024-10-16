@@ -147,7 +147,10 @@ func (node *Node) Run(ctx context.Context) error {
 				continue
 			}
 			if !node.dkgStarted {
-				node.setup(ctx, nonce)
+				err := node.setup(ctx, nonce)
+				if err != nil {
+					continue
+				}
 			}
 			node.board.deals <- *db
 			node.counter += 1

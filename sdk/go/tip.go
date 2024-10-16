@@ -136,7 +136,7 @@ func (c *Client) Sign(ks, ephemeral string, nonce, grace int64, rotate, assignee
 		amc = c
 	}
 	for p, a := range pam {
-		if bytes.Compare(a, assignor) != 0 {
+		if !bytes.Equal(a, assignor) {
 			continue
 		}
 		partial, _ := hex.DecodeString(p)

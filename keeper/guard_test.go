@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/MixinNetwork/tip/crypto"
+	"github.com/MixinNetwork/tip/logger"
 	"github.com/MixinNetwork/tip/store"
 	"github.com/drand/kyber"
 	"github.com/drand/kyber/pairing/bn256"
@@ -56,19 +57,19 @@ func TestGuard(t *testing.T) {
 	}
 
 	// data should be base64 RawURLEncoding and none blank
-	signature, data := makeTestRequest(user, node, ephmr, nil, 1024, grace)
-	res, err := Guard(bs, signer, identity, signature, "")
+	signature, _ := makeTestRequest(user, node, ephmr, nil, 1024, grace)
+	_, err = Guard(bs, signer, identity, signature, "")
 	assert.NotNil(err)
 
 	// identity is not equal
-	signature, data = makeTestRequestWithInvalidIdentity(user, node, ephmr, nil, 1039, grace, "", "", "")
-	res, err = Guard(bs, signer, identity, signature, data)
+	signature, data := makeTestRequestWithInvalidIdentity(user, node, ephmr, nil, 1039, grace, "", "", "")
+	_, err = Guard(bs, signer, identity, signature, data)
 	assert.NotNil(err)
 	assert.Contains(err.Error(), "invalid identity ")
 
 	// invalid nonce
 	signature, data = makeTestRequest(user, node, ephmr, nil, 1024, grace)
-	res, err = Guard(bs, signer, identity, signature, data)
+	res, err := Guard(bs, signer, identity, signature, data)
 	assert.Nil(err)
 	assert.Equal(EphemeralLimitQuota-1, res.Available)
 	assert.Nil(res.Watcher)
@@ -107,7 +108,7 @@ func TestGuard(t *testing.T) {
 
 	// invalid signature
 	for i := 1; i < 6; i++ {
-		signature, data = makeTestRequest(user, node, ephmr, nil, uint64(1033+i), grace)
+		_, data = makeTestRequest(user, node, ephmr, nil, uint64(1033+i), grace)
 		res, err := Guard(bs, signer, identity, hex.EncodeToString(ephmr), data)
 		assert.Nil(err)
 		assert.Equal(res.Available, SecretLimitQuota-i)
@@ -141,7 +142,7 @@ func TestGuard(t *testing.T) {
 
 	// invalid assignee
 	signature, data = makeTestRequestWithAssigneeAndRotation(user, node, ephmr, nil, 1039, grace, identity, "", "")
-	res, err = Guard(bs, signer, identity, signature, data)
+	_, err = Guard(bs, signer, identity, signature, data)
 	assert.NotNil(err)
 	assert.Contains(err.Error(), "invalid assignee ")
 	// valid assignee
@@ -281,7 +282,7 @@ func TestGuard(t *testing.T) {
 	assert.NotNil(res)
 	// update li' pin with wrong assignee
 	signature, data = makeTestRequestWithAssigneeAndRotation(li, node, ephmr, nil, 105, grace, hex.EncodeToString(assignee), "", hex.EncodeToString(liWatcher))
-	res, err = Guard(bs, signer, liIdentity, signature, data)
+	_, err = Guard(bs, signer, liIdentity, signature, data)
 	assert.NotNil(err)
 	assert.Contains(err.Error(), "invalid assignor as is assignee")
 	// update li pin
@@ -361,11 +362,15 @@ func TestAssigneeAndRotation(t *testing.T) {
 
 func makeTestRequest(user kyber.Scalar, signer kyber.Point, ephmr, rtt []byte, nonce, grace uint64) (string, string) {
 	seed := make([]byte, 32)
-	rand.Read(seed)
+	_, err := rand.Read(seed)
+	if err != nil {
+		panic(err)
+	}
 	return makeTestRequestWithAssigneeAndRotation(user, signer, ephmr, rtt, nonce, grace, "", "", hex.EncodeToString(seed))
 }
 
 func makeTestRequestWithAssigneeAndRotation(user kyber.Scalar, signer kyber.Point, ephmr, rtt []byte, nonce, grace uint64, assignee, rotation, watcher string) (string, string) {
+	logger.Debugf("rotation not tested %s", rotation)
 	pkey := crypto.PublicKey(user)
 	msg := crypto.PublicKeyBytes(pkey)
 	msg = append(msg, ephmr...)
@@ -397,6 +402,7 @@ func makeTestRequestWithAssigneeAndRotation(user kyber.Scalar, signer kyber.Poin
 }
 
 func makeTestRequestWithInvalidIdentity(user kyber.Scalar, signer kyber.Point, ephmr, rtt []byte, nonce, grace uint64, assignee, rotation, watcher string) (string, string) {
+	logger.Debugf("rotation and assignee not tested %s %s", rotation, assignee)
 	pkey := crypto.PublicKey(user)
 	msg := crypto.PublicKeyBytes(pkey)
 	msg = append(msg, ephmr...)

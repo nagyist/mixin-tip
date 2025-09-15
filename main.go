@@ -18,7 +18,7 @@ import (
 	"github.com/drand/kyber/pairing/bn256"
 	"github.com/drand/kyber/sign/bdn"
 	"github.com/drand/kyber/util/random"
-	"github.com/fox-one/mixin-sdk-go"
+	"github.com/fox-one/mixin-sdk-go/v2"
 	"github.com/urfave/cli/v2"
 )
 
